@@ -12,14 +12,17 @@ import packageJson from '../package.json'
 
 type ServerUrlParseResult = {
   serverUrl: string | null
+  webappUrl: string | null
   cleanedArgs: string[]
 }
 
 const serverUrlFlags = new Set(['--server-url', '--server'])
+const webappUrlFlags = new Set(['--webapp-url', '--webapp'])
 
 export function parseServerUrlArgs(argv: string[]): ServerUrlParseResult {
   const cleanedArgs: string[] = []
   let serverUrl: string | null = null
+  let webappUrl: string | null = null
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -32,6 +35,15 @@ export function parseServerUrlArgs(argv: string[]): ServerUrlParseResult {
       i += 1
       continue
     }
+    if (webappUrlFlags.has(arg)) {
+      const value = argv[i + 1]
+      if (!value || value.startsWith('-')) {
+        throw new Error(`Missing value for ${arg}. Example: ${arg} https://webapp.example.com`)
+      }
+      webappUrl = value
+      i += 1
+      continue
+    }
     if (arg.startsWith('--server-url=') || arg.startsWith('--server=')) {
       const value = arg.split('=', 2)[1]
       if (!value) {
@@ -40,10 +52,18 @@ export function parseServerUrlArgs(argv: string[]): ServerUrlParseResult {
       serverUrl = value
       continue
     }
+    if (arg.startsWith('--webapp-url=') || arg.startsWith('--webapp=')) {
+      const value = arg.split('=', 2)[1]
+      if (!value) {
+        throw new Error(`Missing value for ${arg}. Example: ${arg}https://webapp.example.com`)
+      }
+      webappUrl = value
+      continue
+    }
     cleanedArgs.push(arg)
   }
 
-  return { serverUrl, cleanedArgs }
+  return { serverUrl, webappUrl, cleanedArgs }
 }
 
 function shouldRequireServerUrl(argv: string[]): boolean {
@@ -74,8 +94,11 @@ class Configuration {
     // Server configuration - required CLI parameter
     const argv = process.argv.slice(2)
     let resolvedServerUrl: string | null = null
+    let resolvedWebappUrl: string | null = null
     try {
-      resolvedServerUrl = parseServerUrlArgs(argv).serverUrl
+      const parsed = parseServerUrlArgs(argv)
+      resolvedServerUrl = parsed.serverUrl
+      resolvedWebappUrl = parsed.webappUrl
     } catch (error) {
       console.error(error instanceof Error ? error.message : String(error))
       process.exit(1)
@@ -91,7 +114,10 @@ class Configuration {
       process.env.HAPPY_SERVER_URL = resolvedServerUrl
     }
     this.serverUrl = resolvedServerUrl || ''
-    this.webappUrl = process.env.HAPPY_WEBAPP_URL || 'https://app.happy.engineering'
+    if (resolvedWebappUrl) {
+      process.env.HAPPY_WEBAPP_URL = resolvedWebappUrl
+    }
+    this.webappUrl = resolvedWebappUrl || process.env.HAPPY_WEBAPP_URL || ''
 
     // Check if we're running as daemon based on process args
     const args = process.argv.slice(2)

@@ -25,8 +25,8 @@ export default defineConfig({
             ],
         },
         env: {
-            ...process.env,
             ...testEnv,
+            ...process.env,
         }
     },
     resolve: {

@@ -429,7 +429,7 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
 ${chalk.bold('happy')} - Claude Code On the Go
 
 ${chalk.bold('Usage:')}
-  happy --server-url <url> Start Claude with mobile control
+  happy --server-url <url> [--webapp-url <url>] Start Claude with mobile control
   happy auth              Manage authentication
   happy codex             Start Codex mode
   happy gemini            Start Gemini mode (ACP)

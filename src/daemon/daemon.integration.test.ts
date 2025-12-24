@@ -11,7 +11,7 @@
  * 
  * The integration test environment uses .env.integration-test which sets:
  * - HAPPY_HOME_DIR=~/.happy-dev-test (DIFFERENT from dev's ~/.happy-dev!)
- * - HAPPY_SERVER_URL=http://localhost:3005 (local dev server)
+ * - HAPPY_SERVER_URL=http://localhost:3005 (local dev server or custom)
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -47,10 +47,28 @@ async function waitFor(
 }
 
 // Check if dev server is running and properly configured
+function resolveServerHealthUrl(): string | null {
+  const serverUrl = configuration.serverUrl || process.env.HAPPY_SERVER_URL || '';
+  if (!serverUrl) {
+    console.log('[TEST] HAPPY_SERVER_URL is not set; skipping integration tests');
+    return null;
+  }
+  try {
+    return new URL('/', serverUrl).toString();
+  } catch (error) {
+    console.log('[TEST] Invalid HAPPY_SERVER_URL:', serverUrl, error);
+    return null;
+  }
+}
+
 async function isServerHealthy(): Promise<boolean> {
+  const healthUrl = resolveServerHealthUrl();
+  if (!healthUrl) {
+    return false;
+  }
   try {
     // First check if server responds
-    const response = await fetch('http://localhost:3005/', { 
+    const response = await fetch(healthUrl, { 
       signal: AbortSignal.timeout(1000) 
     });
     if (!response.ok) {

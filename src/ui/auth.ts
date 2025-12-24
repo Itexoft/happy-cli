@@ -18,7 +18,8 @@ export async function doAuth(): Promise<Credentials | null> {
     console.clear();
 
     // Show authentication method selector
-    const authMethod = await selectAuthenticationMethod();
+    const supportsWebAuth = Boolean(configuration.webappUrl);
+    const authMethod = await selectAuthenticationMethod(supportsWebAuth);
     if (!authMethod) {
         console.log('\nAuthentication cancelled.\n');
         process.exit(0);
@@ -54,7 +55,7 @@ export async function doAuth(): Promise<Credentials | null> {
 /**
  * Display authentication method selector and return user choice
  */
-function selectAuthenticationMethod(): Promise<AuthMethod | null> {
+function selectAuthenticationMethod(supportsWebAuth: boolean): Promise<AuthMethod | null> {
     return new Promise((resolve) => {
         let hasResolved = false;
 
@@ -74,7 +75,7 @@ function selectAuthenticationMethod(): Promise<AuthMethod | null> {
             }
         };
 
-        const app = render(React.createElement(AuthSelector, { onSelect, onCancel }), {
+        const app = render(React.createElement(AuthSelector, { onSelect, onCancel, supportsWebAuth }), {
             exitOnCtrlC: false,
             patchConsole: false
         });
@@ -103,6 +104,11 @@ async function doMobileAuth(keypair: tweetnacl.BoxKeyPair): Promise<Credentials 
  * Handle web authentication flow
  */
 async function doWebAuth(keypair: tweetnacl.BoxKeyPair): Promise<Credentials | null> {
+    if (!configuration.webappUrl) {
+        console.log('Web authentication is not configured.');
+        console.log('Set --webapp-url <url> or HAPPY_WEBAPP_URL to enable web auth.');
+        return null;
+    }
     console.clear();
     console.log('\nWeb Authentication\n');
 

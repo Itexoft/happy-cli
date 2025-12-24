@@ -8,5 +8,8 @@ import { configuration } from '@/configuration';
  */
 export function generateWebAuthUrl(publicKey: Uint8Array): string {
     const publicKeyBase64 = encodeBase64(publicKey, 'base64url');
+    if (!configuration.webappUrl) {
+        throw new Error('Web auth requires --webapp-url <url> or HAPPY_WEBAPP_URL to be set.');
+    }
     return `${configuration.webappUrl}/terminal/connect#key=${publicKeyBase64}`;
 }

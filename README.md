@@ -34,6 +34,7 @@ This will:
 - `-h, --help` - Show help
 - `-v, --version` - Show version
 - `--server-url <url>` - Required server URL
+- `--webapp-url <url>` - Web auth URL (required for web authentication)
 - `-m, --model <model>` - Claude model to use (default: sonnet)
 - `-p, --permission-mode <mode>` - Permission mode: auto, default, or plan
 - `--claude-env KEY=VALUE` - Set environment variable for Claude Code (e.g., for [claude-code-router](https://github.com/musistudio/claude-code-router))
@@ -41,7 +42,7 @@ This will:
 
 ## Environment Variables
 
-- `HAPPY_WEBAPP_URL` - Custom web app URL (default: https://app.happy.engineering)
+- `HAPPY_WEBAPP_URL` - Web auth URL (required for web authentication)
 - `HAPPY_HOME_DIR` - Custom home directory for Happy data (default: ~/.happy)
 - `HAPPY_DISABLE_CAFFEINATE` - Disable macOS sleep prevention (set to `true`, `1`, or `yes`)
 - `HAPPY_EXPERIMENTAL` - Enable experimental features (set to `true`, `1`, or `yes`)

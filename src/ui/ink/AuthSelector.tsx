@@ -6,9 +6,10 @@ export type AuthMethod = 'mobile' | 'web';
 interface AuthSelectorProps {
     onSelect: (method: AuthMethod) => void;
     onCancel: () => void;
+    supportsWebAuth: boolean;
 }
 
-export const AuthSelector: React.FC<AuthSelectorProps> = ({ onSelect, onCancel }) => {
+export const AuthSelector: React.FC<AuthSelectorProps> = ({ onSelect, onCancel, supportsWebAuth }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     
     const options: Array<{ 
@@ -18,12 +19,21 @@ export const AuthSelector: React.FC<AuthSelectorProps> = ({ onSelect, onCancel }
         {
             method: 'mobile',
             label: 'Mobile App'
-        },
-        {
-            method: 'web',
-            label: 'Web Browser'
         }
     ];
+
+    if (supportsWebAuth) {
+        options.push({
+            method: 'web',
+            label: 'Web Browser'
+        });
+    }
+
+    useEffect(() => {
+        if (selectedIndex >= options.length) {
+            setSelectedIndex(options.length - 1);
+        }
+    }, [options.length, selectedIndex]);
 
     useInput((input, key) => {
         if (key.upArrow) {
@@ -37,7 +47,7 @@ export const AuthSelector: React.FC<AuthSelectorProps> = ({ onSelect, onCancel }
         } else if (input === '1') {
             setSelectedIndex(0);
             onSelect('mobile');
-        } else if (input === '2') {
+        } else if (input === '2' && supportsWebAuth) {
             setSelectedIndex(1);
             onSelect('web');
         }
@@ -65,7 +75,9 @@ export const AuthSelector: React.FC<AuthSelectorProps> = ({ onSelect, onCancel }
             </Box>
 
             <Box marginTop={1}>
-                <Text dimColor>Use arrows or 1-2 to select, Enter to confirm</Text>
+                <Text dimColor>
+                    {supportsWebAuth ? 'Use arrows or 1-2 to select, Enter to confirm' : 'Press Enter to confirm'}
+                </Text>
             </Box>
         </Box>
     );
