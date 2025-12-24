@@ -223,15 +223,6 @@ export async function runGemini(opts: {
 
   const sendReady = () => {
     session.sendSessionEvent({ type: 'ready' });
-    try {
-      api.push().sendToAllDevices(
-        "It's ready!",
-        'Gemini is waiting for your command',
-        { sessionId: session.sessionId }
-      );
-    } catch (pushError) {
-      logger.debug('[Gemini] Failed to send ready push', pushError);
-    }
   };
 
   /**
@@ -1099,4 +1090,3 @@ export async function runGemini(opts: {
     logger.debug('[gemini]: Final cleanup completed');
   }
 }
-

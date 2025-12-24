@@ -10,6 +10,49 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import packageJson from '../package.json'
 
+type ServerUrlParseResult = {
+  serverUrl: string | null
+  cleanedArgs: string[]
+}
+
+const serverUrlFlags = new Set(['--server-url', '--server'])
+
+export function parseServerUrlArgs(argv: string[]): ServerUrlParseResult {
+  const cleanedArgs: string[] = []
+  let serverUrl: string | null = null
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    if (serverUrlFlags.has(arg)) {
+      const value = argv[i + 1]
+      if (!value || value.startsWith('-')) {
+        throw new Error(`Missing value for ${arg}. Example: ${arg} https://api.example.com`)
+      }
+      serverUrl = value
+      i += 1
+      continue
+    }
+    if (arg.startsWith('--server-url=') || arg.startsWith('--server=')) {
+      const value = arg.split('=', 2)[1]
+      if (!value) {
+        throw new Error(`Missing value for ${arg}. Example: ${arg}https://api.example.com`)
+      }
+      serverUrl = value
+      continue
+    }
+    cleanedArgs.push(arg)
+  }
+
+  return { serverUrl, cleanedArgs }
+}
+
+function shouldRequireServerUrl(argv: string[]): boolean {
+  return !argv.includes('--help')
+    && !argv.includes('-h')
+    && !argv.includes('--version')
+    && !argv.includes('-v')
+}
+
 class Configuration {
   public readonly serverUrl: string
   public readonly webappUrl: string
@@ -28,8 +71,26 @@ class Configuration {
   public readonly disableCaffeinate: boolean
 
   constructor() {
-    // Server configuration - priority: parameter > environment > default
-    this.serverUrl = process.env.HAPPY_SERVER_URL || 'https://api.cluster-fluster.com'
+    // Server configuration - required CLI parameter
+    const argv = process.argv.slice(2)
+    let resolvedServerUrl: string | null = null
+    try {
+      resolvedServerUrl = parseServerUrlArgs(argv).serverUrl
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : String(error))
+      process.exit(1)
+    }
+    if (!resolvedServerUrl && process.env.VITEST && process.env.HAPPY_SERVER_URL) {
+      resolvedServerUrl = process.env.HAPPY_SERVER_URL
+    }
+    if (!resolvedServerUrl && shouldRequireServerUrl(argv)) {
+      console.error('Missing required --server-url <url> argument. Example: happy --server-url https://api.example.com')
+      process.exit(1)
+    }
+    if (resolvedServerUrl) {
+      process.env.HAPPY_SERVER_URL = resolvedServerUrl
+    }
+    this.serverUrl = resolvedServerUrl || ''
     this.webappUrl = process.env.HAPPY_WEBAPP_URL || 'https://app.happy.engineering'
 
     // Check if we're running as daemon based on process args

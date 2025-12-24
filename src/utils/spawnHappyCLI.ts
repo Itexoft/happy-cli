@@ -69,6 +69,14 @@ import { existsSync } from 'node:fs';
 export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): ChildProcess {
   const projectRoot = projectPath();
   const entrypoint = join(projectRoot, 'dist', 'index.mjs');
+  const serverUrl = process.env.HAPPY_SERVER_URL;
+  const hasServerUrlArg = args.some((arg) => {
+    if (arg === '--server-url' || arg === '--server') {
+      return true;
+    }
+    return arg.startsWith('--server-url=') || arg.startsWith('--server=');
+  });
+  const spawnArgs = !serverUrl || hasServerUrlArg ? args : [...args, '--server-url', serverUrl];
 
   let directory: string | URL | undefined;
   if ('cwd' in options) {
@@ -81,7 +89,7 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
   // However, we log it as 'happy' here because other engineers are typically looking
   // for when "happy" was started and don't care about the underlying node process
   // details and flags we use to achieve the same result.
-  const fullCommand = `happy ${args.join(' ')}`;
+  const fullCommand = `happy ${spawnArgs.join(' ')}`;
   logger.debug(`[SPAWN HAPPY CLI] Spawning: ${fullCommand} in ${directory}`);
   
   // Use the same Node.js flags that the wrapper script uses
@@ -89,7 +97,7 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
     '--no-warnings',
     '--no-deprecation',
     entrypoint,
-    ...args
+    ...spawnArgs
   ];
 
   // Sanity check of the entrypoint path exists

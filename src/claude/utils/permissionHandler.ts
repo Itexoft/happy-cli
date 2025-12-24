@@ -11,7 +11,6 @@ import { PermissionResult } from "../sdk/types";
 import { PLAN_FAKE_REJECT, PLAN_FAKE_RESTART } from "../sdk/prompts";
 import { Session } from "../session";
 import { deepEqual } from "@/utils/deepEqual";
-import { getToolName } from "./getToolName";
 import { EnhancedMode, PermissionMode } from "../loop";
 import { getToolDescriptor } from "./getToolDescriptor";
 import { delay } from "@/utils/time";
@@ -200,18 +199,6 @@ export class PermissionHandler {
                 this.onPermissionRequestCallback(id);
             }
             
-            // Send push notification
-            this.session.api.push().sendToAllDevices(
-                'Permission Request',
-                `Claude wants to ${getToolName(toolName)}`,
-                {
-                    sessionId: this.session.client.sessionId,
-                    requestId: id,
-                    tool: toolName,
-                    type: 'permission_request'
-                }
-            );
-
             // Update agent state
             this.session.client.updateAgentState((currentState) => ({
                 ...currentState,

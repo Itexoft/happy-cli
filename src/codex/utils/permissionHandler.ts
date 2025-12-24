@@ -56,18 +56,6 @@ export class CodexPermissionHandler {
                 input
             });
 
-            // Send push notification
-            // this.session.api.push().sendToAllDevices(
-            //     'Permission Request',
-            //     `Codex wants to use ${toolName}`,
-            //     {
-            //         sessionId: this.session.sessionId,
-            //         requestId: toolCallId,
-            //         tool: toolName,
-            //         type: 'permission_request'
-            //     }
-            // );
-
             // Update agent state with pending request
             this.session.updateAgentState((currentState) => ({
                 ...currentState,

@@ -13,7 +13,7 @@ npm install -g happy-coder
 ## Usage
 
 ```bash
-happy
+happy --server-url https://api.example.com
 ```
 
 This will:
@@ -26,7 +26,6 @@ This will:
 - `happy auth` – Manage authentication
 - `happy codex` – Start Codex mode
 - `happy connect` – Store AI vendor API keys in Happy cloud
-- `happy notify` – Send a push notification to your devices
 - `happy daemon` – Manage background service
 - `happy doctor` – System diagnostics & troubleshooting
 
@@ -34,6 +33,7 @@ This will:
 
 - `-h, --help` - Show help
 - `-v, --version` - Show version
+- `--server-url <url>` - Required server URL
 - `-m, --model <model>` - Claude model to use (default: sonnet)
 - `-p, --permission-mode <mode>` - Permission mode: auto, default, or plan
 - `--claude-env KEY=VALUE` - Set environment variable for Claude Code (e.g., for [claude-code-router](https://github.com/musistudio/claude-code-router))
@@ -41,7 +41,6 @@ This will:
 
 ## Environment Variables
 
-- `HAPPY_SERVER_URL` - Custom server URL (default: https://api.cluster-fluster.com)
 - `HAPPY_WEBAPP_URL` - Custom web app URL (default: https://app.happy.engineering)
 - `HAPPY_HOME_DIR` - Custom home directory for Happy data (default: ~/.happy)
 - `HAPPY_DISABLE_CAFFEINATE` - Disable macOS sleep prevention (set to `true`, `1`, or `yes`)
